@@ -28,36 +28,35 @@
 package main
 
 import (
-  "time"
+    "fmt"
+    "time"
 
-  "github.com/globocom/go-buffer/v2"
+    "github.com/globocom/go-buffer/v3"
 )
 
 func main() {
-  buff := buffer.New(
-    // buffer can hold up to 5 items
-    buffer.WithSize(5),
-    // call this function when the buffer needs flushing
-    buffer.WithFlusher(buffer.FlusherFunc(func(items []interface{}) {
-      for _, item := range items {
-        println(item.(string))
-      }
-    })),
-  )
-  // ensure the buffer
-  defer buff.Close()
+    buff := buffer.New[string](
+        // the Flusher.Write method is called when the buffer need to be flushed
+        func(items []string) {
+            for _, item := range items {
+                fmt.Println(item)
+            }
+        },
+        // buffer cab hold up to 5 items
+        buffer.WithSize(5),
+    )
+    defer buff.Close()
 
-  buff.Push("item 1")
-  buff.Push("item 2")
-  buff.Push("item 3")
-  buff.Push("item 4")
-  buff.Push("item 5")
+    buff.Push("item 1")
+    buff.Push("item 2")
+    buff.Push("item 3")
+    buff.Push("item 4")
+    buff.Push("item 5")
 
-  // block the current goroutine
-  time.Sleep(3 * time.Second)
-
-  println("done")
+    time.Sleep(3 * time.Second)
+    fmt.Println("done")
 }
+
 ```
 
 ### Interval-triggered flush
@@ -66,36 +65,34 @@ func main() {
 package main
 
 import (
-  "time"
+    "fmt"
+    "time"
 
-  "github.com/globocom/go-buffer/v2"
+    "github.com/globocom/go-buffer/v3"
 )
 
 func main() {
-  buff := buffer.New(
-    // buffer can hold up to 5 items
-    buffer.WithSize(5),
-    // buffer will be flushed every second, regardless of
-    // how many items were pushed
-    buffer.WithFlushInterval(time.Second),
-    // call this function when the buffer needs flushing
-    buffer.WithFlusher(buffer.FlusherFunc(func(items []interface{}) {
-      for _, item := range items {
-        println(item.(string))
-      }
-    })),
-  )
-  defer buff.Close()
+    buff := buffer.New[string](
+        func(items []string) {
+            for _, item := range items {
+                fmt.Println(item)
+            }
+        },
+        buffer.WithSize(5),
+        // buffer will be flushed every second, regardless of
+        // how many items were pushed
+        buffer.WithFlushInterval(time.Second),
+    )
+    defer buff.Close()
 
-  buff.Push("item 1")
-  buff.Push("item 2")
-  buff.Push("item 3")
+    buff.Push("item 1")
+    buff.Push("item 2")
+    buff.Push("item 3")
 
-  // block the current goroutine
-  time.Sleep(3 * time.Second)
-
-  println("done")
+    time.Sleep(3 * time.Second)
+    fmt.Println("done")
 }
+
 ```
 
 ### Manual flush
@@ -104,34 +101,32 @@ func main() {
 package main
 
 import (
-  "time"
+    "fmt"
+    "time"
 
-  "github.com/globocom/go-buffer/v2"
+    "github.com/globocom/go-buffer/v3"
 )
 
 func main() {
-  buff := buffer.New(
-    // buffer can hold up to 5 items
-    buffer.WithSize(5),
-    // call this function when the buffer needs flushing
-    buffer.WithFlusher(buffer.FlusherFunc(func(items []interface{}) {
-      for _, item := range items {
-        println(item.(string))
-      }
-    })),
-  )
-  defer buff.Close()
+    buff := buffer.New[string](
+        func(items []string) {
+            for _, item := range items {
+                fmt.Println(item)
+            }
+        },
+        buffer.WithSize(5),
+    )
+    defer buff.Close()
 
-  buff.Push("item 1")
-  buff.Push("item 2")
-  buff.Push("item 3")
+    buff.Push("item 1")
+    buff.Push("item 2")
+    buff.Push("item 3")
 
-  // block the current goroutine
-  time.Sleep(3*time.Second)
-
-  buff.Flush()
-  println("done")
+    time.Sleep(3 * time.Second)
+    buff.Flush()
+    fmt.Println("done")
 }
+
 ```
 
 ## Documentation
